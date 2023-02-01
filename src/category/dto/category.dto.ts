@@ -1,8 +1,8 @@
-import { Field, ObjectType, ID, Directive } from '@nestjs/graphql';
+import { Field, ObjectType, Directive } from '@nestjs/graphql';
 
 @ObjectType()
 export class CreateCategoryDTO {
-  @Field((type) => ID)
+  @Field()
   readonly _id: string;
 
   @Directive('@upper')

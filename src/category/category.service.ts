@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Category, CategoryDocument } from './category.schema';
+import { Category } from './category.schema';
 import {
   CategoryInput,
   FindCategoryInput,
@@ -12,7 +12,7 @@ import {
 export class CategoryService {
   constructor(
     @InjectModel(Category.name)
-    private readonly categoryModel: Model<CategoryDocument>,
+    private categoryModel: Model<Category>,
   ) {}
 
   async findAll(): Promise<Category[]> {
@@ -23,9 +23,10 @@ export class CategoryService {
     return await this.categoryModel.findById(category._id);
   }
 
-  async create(createCategory: CategoryInput): Promise<Category> {
+  async createCategory(createCategory: CategoryInput): Promise<Category> {
     try {
-      const createdCategory = await this.categoryModel.create(createCategory);
+      const createdCategory = new this.categoryModel(createCategory);
+      await createdCategory.save();
       return createdCategory;
     } catch (err) {
       return err;
@@ -43,6 +44,8 @@ export class CategoryService {
   }
 
   async delete(_id: string): Promise<any> {
-    return await this.categoryModel.deleteOne({ _id: new Types.ObjectId(_id) });
+    const categoryDeleted = await this.categoryModel.findByIdAndDelete(_id);
+    if (categoryDeleted != null) return 'Category remove with success';
+    return 'Category id is not exist';
   }
 }

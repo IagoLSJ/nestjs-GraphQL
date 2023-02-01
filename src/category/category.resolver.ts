@@ -19,7 +19,7 @@ export class CategoryResolver {
 
   @Mutation(() => CreateCategoryDTO)
   async createCategory(@Args('input') input: CategoryInput): Promise<Category> {
-    return await this.categoryService.create(input);
+    return await this.categoryService.createCategory(input);
   }
 
   @Query(() => CreateCategoryDTO)
@@ -36,7 +36,6 @@ export class CategoryResolver {
 
   @Mutation(() => String)
   async deleteCategory(@Args('input') input: FindCategoryInput): Promise<any> {
-    await this.categoryService.delete(input._id);
-    return 'Category deleted';
+    return await this.categoryService.delete(input._id);
   }
 }
