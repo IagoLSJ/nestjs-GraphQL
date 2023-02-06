@@ -1,36 +1,40 @@
+import { Mutation, Resolver, Query, Args } from '@nestjs/graphql';
 import {
   CategoryInput,
   FindCategoryInput,
   UpdateCategoryInput,
 } from './inputes/category.input';
+
 import { CategoryService } from './category.service';
-import { Mutation, Resolver, Query, Args } from '@nestjs/graphql';
-import { CreateCategoryDTO } from './dto/category.dto';
-import { Category } from './category.schema';
+import { CategoryReturnDTO } from './dto/category.return.dto';
 
 @Resolver()
 export class CategoryResolver {
   constructor(private categoryService: CategoryService) {}
 
-  @Query(() => [CreateCategoryDTO])
-  async categories() {
+  @Query(() => [CategoryReturnDTO])
+  async categories(): Promise<CategoryReturnDTO[]> {
     return await this.categoryService.findAll();
   }
 
-  @Mutation(() => CreateCategoryDTO)
-  async createCategory(@Args('input') input: CategoryInput): Promise<Category> {
+  @Mutation(() => CategoryReturnDTO)
+  async createCategory(
+    @Args('input') input: CategoryInput,
+  ): Promise<CategoryReturnDTO> {
     return await this.categoryService.createCategory(input);
   }
 
-  @Query(() => CreateCategoryDTO)
-  async findCategory(@Args('input') input: FindCategoryInput): Promise<any> {
-    return await this.categoryService.findById(input);
+  @Query(() => CategoryReturnDTO)
+  async findCategory(
+    @Args('input') input: FindCategoryInput,
+  ): Promise<CategoryReturnDTO> {
+    return await this.categoryService.findById(input._id);
   }
 
-  @Mutation(() => CreateCategoryDTO)
+  @Mutation(() => CategoryReturnDTO)
   async updateCategory(
     @Args('input') input: UpdateCategoryInput,
-  ): Promise<any> {
+  ): Promise<CategoryReturnDTO> {
     return await this.categoryService.update(input);
   }
 

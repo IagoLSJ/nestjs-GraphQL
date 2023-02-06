@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+
+import { AppError } from 'src/shared/erros/app-erro';
+
+import { CategoryReturnDTO } from 'src/category/dto/category.return.dto';
+
+import { CategoryInput, UpdateCategoryInput } from './inputes/category.input';
+
 import { Category } from './category.schema';
-import {
-  CategoryInput,
-  FindCategoryInput,
-  UpdateCategoryInput,
-} from './inputes/category.input';
 
 @Injectable()
 export class CategoryService {
@@ -15,25 +17,37 @@ export class CategoryService {
     private categoryModel: Model<Category>,
   ) {}
 
-  async findAll(): Promise<Category[]> {
+  async findAll(): Promise<CategoryReturnDTO[]> {
     return await this.categoryModel.find().exec();
   }
 
-  async findById(category: FindCategoryInput): Promise<Category> {
-    return await this.categoryModel.findById(category._id);
+  async findById(categoryId: string): Promise<CategoryReturnDTO> {
+    const categoryById = await this.categoryModel.findById(categoryId);
+    if (!categoryById) throw new AppError('Category Id is not exist');
+
+    return categoryById;
   }
 
-  async createCategory(createCategory: CategoryInput): Promise<Category> {
-    try {
-      const createdCategory = new this.categoryModel(createCategory);
-      await createdCategory.save();
-      return createdCategory;
-    } catch (err) {
-      return err;
-    }
+  async createCategory(
+    createCategory: CategoryInput,
+  ): Promise<CategoryReturnDTO> {
+    const categoryByName = await this.categoryModel.find({
+      name: createCategory.name,
+    });
+
+    if (categoryByName.length > 0)
+      throw new AppError('category name already in use', 402);
+
+    const createdCategory = await this.categoryModel.create(createCategory);
+
+    await createdCategory.save();
+
+    return createdCategory;
   }
 
-  async update(updateCategory: UpdateCategoryInput): Promise<Category> {
+  async update(
+    updateCategory: UpdateCategoryInput,
+  ): Promise<CategoryReturnDTO> {
     const category = await this.categoryModel.findOne(
       new Types.ObjectId(updateCategory._id),
     );
